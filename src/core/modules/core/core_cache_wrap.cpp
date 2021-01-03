@@ -377,8 +377,18 @@ void export_cached_property(scope _cache)
 		":param object instance:\n"
 		"	The instance to set the cached value for.\n"
 		":param object value:\n"
-		"	The value to set as cached value.\n",
+		"	The value to set as cached value.",
 		args("self", "instance", "value")
+	);
+
+	CachedProperty.def(
+		"delete_cached_value",
+		&CCachedProperty::delete_cached_value,
+		"Deletes the cached value for the given instance.\n"
+		"\n"
+		":param object instance:\n"
+		"	The instance to delete the cached value for.",
+		args("self", "instance")
 	);
 
 	CachedProperty.def(
@@ -421,7 +431,7 @@ void export_cached_property(scope _cache)
 		"	If the getter, setter or deleter are not callable.",
 		(
 			"descriptor", arg("owner")=object(), arg("name")=str(),
-			arg("unbound")=false, arg("args")=boost::python::tuple(), arg("kwargs")=dict()
+			arg("unbound")=false, arg("args")=boost::python::tuple(), arg("kwargs")=object()
 		)
 	)
 	.staticmethod("wrap_descriptor");

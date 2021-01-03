@@ -1,7 +1,7 @@
 /**
 * =============================================================================
 * Source Python
-* Copyright (C) 2012-2015 Source Python Development Team.  All rights reserved.
+* Copyright (C) 2012-2020 Source Python Development Team.  All rights reserved.
 * =============================================================================
 *
 * This program is free software; you can redistribute it and/or modify it under
@@ -24,57 +24,78 @@
 * Development Team grants this exception to all derivative works.
 */
 
-#ifndef UNDEFINED_SYMBOLS_BLADE_H
-#define UNDEFINED_SYMBOLS_BLADE_H
+#ifndef _ENGINES_GAMERULES_H
+#define _ENGINES_GAMERULES_H
 
 //-----------------------------------------------------------------------------
 // Includes.
 //-----------------------------------------------------------------------------
-#include "dt_send.h"
-#include "game/shared/ehandle.h"
-#include "isaverestore.h"
-#include "datamap.h"
-#include "game/shared/takedamageinfo.h"
+// SDK
+#include "strtools.h"
 
 
 //-----------------------------------------------------------------------------
-// CTakeDamageInfo constructor declaration.
+// Functions
 //-----------------------------------------------------------------------------
-CTakeDamageInfo::CTakeDamageInfo()
-{
-	m_hInflictor = NULL;
-	m_hAttacker = NULL;
-	m_hWeapon = NULL;
-	m_flDamage = 0.0f;
-	m_flBaseDamage = BASEDAMAGE_NOT_SPECIFIED;
-	m_bitsDamageType = 0;
-	m_iDamageCustom = 0;
-	m_flMaxDamage = 0.0f;
-	m_vecDamageForce = vec3_origin;
-	m_vecDamagePosition = vec3_origin;
-	m_vecReportedPosition = vec3_origin;
-	m_iAmmoType = -1;
-}
+class CGameRulesWrapper;
+
+int find_game_rules_property_offset(const char* name);
+const char* find_game_rules_proxy_name();
+CGameRulesWrapper* find_game_rules();
 
 
 //-----------------------------------------------------------------------------
-// CSendProxyRecipients function definitions.
+// Classes.
 //-----------------------------------------------------------------------------
-void CSendProxyRecipients::SetRecipient( int iClient )
+class CGameRulesWrapper
 {
-	m_Bits.Set( iClient );
-}
+public:
 
-void CSendProxyRecipients::ClearRecipient( int iClient )
-{
-	m_Bits.Clear( iClient );
-}
+	// Getter methods
+	template<class T>
+	T GetProperty(const char* name)
+	{
+		return GetPropertyByOffset<T>(find_game_rules_property_offset(name));
+	}
 
-void CSendProxyRecipients::SetOnly( int iClient )
-{
-	m_Bits.ClearAll();
-	m_Bits.Set( iClient );
-}
+	template<class T>
+	T GetPropertyByOffset(int offset)
+	{
+		return *(T *) (((unsigned long) this) + offset);
+	}
 
+	const char* GetPropertyStringArray(const char* name)
+	{
+		return GetPropertyStringArrayByOffset(find_game_rules_property_offset(name));
+	}
 
-#endif // _UNDEFINED_SYMBOLS_BLADE_H
+	const char* GetPropertyStringArrayByOffset(int offset)
+	{
+		return (const char*) (((unsigned long) this) + offset);
+	}
+
+	// Setter methods
+	template<class T>
+	void SetProperty(const char* name, T value)
+	{
+		SetPropertyByOffset<T>(find_game_rules_property_offset(name), value);
+	}
+
+	template<class T>
+	void SetPropertyByOffset(int offset, T value)
+	{
+		*(T *) (((unsigned long) this) + offset) = value;
+	}
+
+	void SetPropertyStringArray(const char* name, const char* value)
+	{
+		SetPropertyStringArrayByOffset(find_game_rules_property_offset(name), value);
+	}
+
+	void SetPropertyStringArrayByOffset(int offset, const char* value)
+	{
+		strcpy((char*) (((unsigned long) this) + offset), value);
+	}
+};
+
+#endif // _ENGINES_GAMERULES_H
